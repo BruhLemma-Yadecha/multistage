@@ -23,12 +23,14 @@ typedef struct rocket_node
 // My functions
 void derFractionator(rocket r, float dV, int currentStage); // Generates a dV combo to be used to generate a rocket.
 void addRocketToList(rocket r); // Used to add a rocket configuration to the program's main linked list.
-void listPrinter(void); // prints the contents of the primary linked list.
+void listPrinter(rocket_node *l); // prints the contents of the primary linked list.
+void vonBraunClock(rocket *r) // Populates the payload array and the totalMass, returns the finished rocket.
 
 // Constants y Globals
 float g = 9.80665;
 float increments;
 rocket_node* theList;
+rocket lightestRocket;
 
 // Temporary variables
 int counter = 0;
@@ -61,8 +63,20 @@ int main(void)
     // Now generate the numbers.
     derFractionator(base, base.totaldV, 0);
 
+    // Now go through the list running vonBraunClock each time to populate the remaining fields.
+    rocket_node *pointer = theList;
+    for (int i = 0; i < counter; i++)
+    {
+        vonBraunClock(pointer->nodeRocket);
+        if (pointer->nodeRocket.totalMass < lightestRocket.totalMass)
+        {
+            lightestRocket = pointer->nodeRocket;
+        }
+        pointer = pointer->next;
+    }
+
     // Printers
-    listPrinter;
+    listPrinter(theList);
 }
 
 void derFractionator(rocket r, float dV, int currentStage)
@@ -79,10 +93,11 @@ void derFractionator(rocket r, float dV, int currentStage)
     else
     {
         r.dV[currentStage] = dV;
-
         counter++;
+        /*
         printf("%d. ", counter);
         floatArrayPrinter(r.stages, r.dV);
+        */
         addRocketToList(r);
     }
 }
@@ -91,14 +106,14 @@ void addRocketToList(rocket s)
 {
     if (theList == NULL)
     {
-        printf("Adding a rocket to the list for the first time...\n");
+        //printf("Adding a rocket to the list for the first time...\n");
         theList = malloc(sizeof(rocket_node));
         theList->nodeRocket = s;
         theList->next = NULL;
     }
     else
     {
-        printf("Adding a rocket...\n");
+        //printf("Adding a rocket...\n");
 
         rocket_node* ptr = theList;
         while (ptr->next != NULL)
@@ -120,19 +135,17 @@ void addRocketToList(rocket s)
     }
 }
 
-rocket vonBraunClock(rocket r)
+void vonBraunClock(rocket *r)
 {
 
 }
 
-void listPrinter(void)
+void listPrinter(rocket_node* l)
 {
-    rocket_node *ptr = theList;
+    rocket_node *ptr = l;
     for (int f = 0; f < counter; f++)
     {
-        printf("%d", ptr->nodeRocket.stages);
         floatArrayPrinter(ptr->nodeRocket.stages, ptr->nodeRocket.dV);
         ptr = ptr->next;
     }
-    while(ptr != NULL);
 }

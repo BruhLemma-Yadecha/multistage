@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "./helper.c"
 
 // My types
@@ -13,12 +14,21 @@ typedef struct rocket
     float fraction[2];
 }rocket;
 
+typedef struct rocket_node
+{
+    rocket nodeRocket;
+    struct rocket_node* next;
+}rocket_node;
+
 // My functions
-void derFractionator(rocket r, float dV, int currentStage);
+void derFractionator(rocket r, float dV, int currentStage); // Generates a dV combo to be used to generate a rocket.
+void addRocketToList(rocket r); // Used to add a rocket configuration to the program's main linked list.
+void listPrinter(void); // prints the contents of the primary linked list.
 
 // Constants y Globals
 float g = 9.80665;
 float increments;
+rocket_node* theList;
 
 // Temporary variables
 int counter = 0;
@@ -50,6 +60,9 @@ int main(void)
 
     // Now generate the numbers.
     derFractionator(base, base.totaldV, 0);
+
+    // Printers
+    listPrinter;
 }
 
 void derFractionator(rocket r, float dV, int currentStage)
@@ -66,6 +79,60 @@ void derFractionator(rocket r, float dV, int currentStage)
     else
     {
         r.dV[currentStage] = dV;
+
+        counter++;
+        printf("%d. ", counter);
         floatArrayPrinter(r.stages, r.dV);
+        addRocketToList(r);
     }
+}
+
+void addRocketToList(rocket s)
+{
+    if (theList == NULL)
+    {
+        printf("Adding a rocket to the list for the first time...\n");
+        theList = malloc(sizeof(rocket_node));
+        theList->nodeRocket = s;
+        theList->next = NULL;
+    }
+    else
+    {
+        printf("Adding a rocket...\n");
+
+        rocket_node* ptr = theList;
+        while (ptr->next != NULL)
+        {
+            ptr = ptr->next;
+        }
+        
+        rocket_node* newNode = malloc(sizeof(rocket_node));
+        ptr->next = newNode;
+        if (newNode != NULL)
+        {
+            newNode->nodeRocket = s;
+            newNode->next = NULL;
+        }
+        else
+        {
+            printf("MALLOC FAILED!\n");
+        }
+    }
+}
+
+rocket vonBraunClock(rocket r)
+{
+
+}
+
+void listPrinter(void)
+{
+    rocket_node *ptr = theList;
+    for (int f = 0; f < counter; f++)
+    {
+        printf("%d", ptr->nodeRocket.stages);
+        floatArrayPrinter(ptr->nodeRocket.stages, ptr->nodeRocket.dV);
+        ptr = ptr->next;
+    }
+    while(ptr != NULL);
 }

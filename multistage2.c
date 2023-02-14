@@ -27,6 +27,7 @@ void addRocketToList(rocket r); // Used to add a rocket configuration to the pro
 void listPrinter(rocket_node *l); // prints the contents of the primary linked list.
 void vonBraunClock(rocket *r, int currentStage); // Populates the payload array and the totalMass, returns the finished rocket.
 float calculateStageMass(float dV, float payload, float fraction, float isp); // Self-explanatory.
+void rocketReport(rocket r); // Generates a breakdown of a rocket.
 
 // Constants y Globals
 float g = 9.80665;
@@ -41,6 +42,7 @@ int main(void)
 {
     rocket base;
     lightestRocket = malloc(sizeof(rocket));
+    lightestRocket->totalMass = 3.402823e+38;
     // Base parameters
     base.stages = 2;
     base.totaldV = 10000.0;
@@ -61,7 +63,7 @@ int main(void)
     //base.fraction[2] = 0.9;
 
     // Simulator settings.
-    increments = 1000.0;
+    increments = 1.0;
 
     // Now generate the numbers.
     derFractionator(base, base.totaldV, 0);
@@ -71,13 +73,10 @@ int main(void)
     for (int i = 0; i < counter; i++)
     {
         vonBraunClock(&pointer->nodeRocket, base.stages - 1);
-        if (pointer->nodeRocket.totalMass >= 0)
+        float mass = pointer->nodeRocket.totalMass;
+        if (mass >= 0)
         {
-            if (&lightestRocket != NULL && pointer->nodeRocket.totalMass < lightestRocket->totalMass)
-            {
-                *lightestRocket = pointer->nodeRocket;
-            }
-            else
+            if (mass < lightestRocket->totalMass)
             {
                 *lightestRocket = pointer->nodeRocket;
             }
@@ -85,9 +84,11 @@ int main(void)
         pointer = pointer->next;
     }
 
+    // Best rocket found, generate a rocket report.
+    rocketReport(*lightestRocket);
+
     // Printers
-    listPrinter(theList);
-    printf("\n%f\n", lightestRocket->totalMass);
+    //listPrinter(theList);
 }
 
 void derFractionator(rocket r, float dV, int currentStage)
@@ -131,7 +132,7 @@ void addRocketToList(rocket s)
         {
             ptr = ptr->next;
         }
-        
+    
         rocket_node* newNode = malloc(sizeof(rocket_node));
         ptr->next = newNode;
         if (newNode != NULL)
@@ -157,10 +158,6 @@ void vonBraunClock(rocket *r, int currentStage)
     else
     {
         r->totalMass = calculateStageMass(r->dV[currentStage], currentStagePayload, r->fraction[currentStage], r->isp[currentStage]) + currentStagePayload;
-        if (r->totalMass < 0)
-        {
-            r->totalMass = 10000000;
-        }
         return;
     }
 }
@@ -180,4 +177,27 @@ void listPrinter(rocket_node* l)
         floatArrayPrinter(ptr->nodeRocket.stages, ptr->nodeRocket.dV);
         ptr = ptr->next;
     }
+}
+
+void rocketReport(rocket r)
+{
+    printf("\nHere's your ideal rocket:\nIncrements: %f\n", increments);
+    printf("Total Mass: %f t\nPayload: %f t\n", r.totalMass, r.payload[r.stages - 1]);
+    float massSoFar = 0;
+    for (int p = r.stages - 1; p > -1; p--)
+    {
+        printf("----------Stage %d----------\n", p + 1);
+        printf("Payload: %f\n", r.payload[p]);
+
+        if (p != 0)
+        {
+            printf("Stage Mass: %f\n", r.payload[p - 1] - r.payload[p]);
+        }
+        else
+        {
+            printf("Stage Mass: %f\n", r.totalMass - r.payload[0]);
+        }
+        printf("Stage dV: %f\n", r.dV[p]);
+    }
+
 }

@@ -81,14 +81,16 @@ int main(void)
                 *lightestRocket = pointer->nodeRocket;
             }
         }
-        pointer = pointer->next;
+        rocket_node *np = pointer->next;
+        free(pointer); // Shrink the list as you go as we already have the data we need.
+        pointer = np;
     }
 
     // Best rocket found, generate a rocket report.
     rocketReport(*lightestRocket);
 
-    // Printers
-    //listPrinter(theList);
+    // Cleanup
+    free(lightestRocket);
 }
 
 void derFractionator(rocket r, float dV, int currentStage)
@@ -199,5 +201,4 @@ void rocketReport(rocket r)
         }
         printf("Stage dV: %f\n", r.dV[p]);
     }
-
 }

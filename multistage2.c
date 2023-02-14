@@ -9,10 +9,10 @@ typedef struct rocket
     int stages;
     float totaldV;
     float totalMass;
-    float dV[2];
-    float payload[2];
-    float isp[2];
-    float fraction[2];
+    float dV[10];
+    float payload[10];
+    float isp[10];
+    float fraction[10];
 }rocket;
 
 typedef struct rocket_node
@@ -24,7 +24,7 @@ typedef struct rocket_node
 // My functions
 void derFractionator(rocket r, float dV, int currentStage); // Generates a dV combo to be used to generate a rocket.
 void addRocketToList(rocket r); // Used to add a rocket configuration to the program's main linked list.
-void listPrinter(rocket_node *l); // prints the contents of the primary linked list.
+void node_printer(rocket_node* l); // prints the contents of the specified linked list node.
 void vonBraunClock(rocket *r, int currentStage); // Populates the payload array and the totalMass, returns the finished rocket.
 float calculateStageMass(float dV, float payload, float fraction, float isp); // Self-explanatory.
 void rocketReport(rocket r); // Generates a breakdown of a rocket.
@@ -44,26 +44,26 @@ int main(void)
     lightestRocket = malloc(sizeof(rocket));
     lightestRocket->totalMass = 3.402823e+38;
     // Base parameters
-    base.stages = 2;
+    base.stages = 3;
     base.totaldV = 10000.0;
 
     // Payload Parameters
     base.payload[0] = 0.0;
-    base.payload[1] = 100.0;
-    //base.payload[2] = 90.0;
+    base.payload[1] = 0.0;
+    base.payload[2] = 100.0;
 
     // Isp
     base.isp[0] = 300.0;
     base.isp[1] = 350.0;
-    //base.isp[2] = 400.0;
+    base.isp[2] = 400.0;
 
     // Fraction
     base.fraction[0] = 0.9;
     base.fraction[1] = 0.9;
-    //base.fraction[2] = 0.9;
+    base.fraction[2] = 0.9;
 
     // Simulator settings.
-    increments = 1000.0;
+    increments = 100.0;
 
     // Now generate the numbers.
     derFractionator(base, base.totaldV, 0);
@@ -81,6 +81,7 @@ int main(void)
                 *lightestRocket = pointer->nodeRocket;
             }
         }
+        //node_printer(pointer);
         rocket_node *np = pointer->next;
         free(pointer); // Shrink the list as you go as we already have the data we need.
         pointer = np;
@@ -170,15 +171,11 @@ float calculateStageMass(float dV, float payload, float fraction, float isp)
     return mass;
 }
 
-void listPrinter(rocket_node* l)
+void node_printer(rocket_node* l)
 {
     rocket_node *ptr = l;
-    for (int f = 0; f < counter; f++)
-    {
-        printf("| %f ", ptr->nodeRocket.totalMass);
-        floatArrayPrinter(ptr->nodeRocket.stages, ptr->nodeRocket.dV);
-        ptr = ptr->next;
-    }
+    printf("| %f ", ptr->nodeRocket.totalMass);
+    floatArrayPrinter(ptr->nodeRocket.stages, ptr->nodeRocket.dV);
 }
 
 void rocketReport(rocket r)

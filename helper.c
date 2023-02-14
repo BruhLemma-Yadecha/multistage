@@ -9,3 +9,12 @@ float floatArraySum(int elements, float arr[])
     }
     return sum;
 }
+
+void floatArrayPrinter(int elements, float arr[])
+{
+    for (int i = 0; i < elements; i++)
+    {
+        printf("| %f ", arr[i]);
+    }
+    printf("|\n");
+}

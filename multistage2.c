@@ -63,7 +63,7 @@ int main(void)
     //base.fraction[2] = 0.9;
 
     // Simulator settings.
-    increments = 1.0;
+    increments = 1000.0;
 
     // Now generate the numbers.
     derFractionator(base, base.totaldV, 0);
@@ -87,7 +87,6 @@ int main(void)
     }
 
     // Best rocket found, generate a rocket report.
-    listEater(theList);
     rocketReport(*lightestRocket);
 
     // Cleanup

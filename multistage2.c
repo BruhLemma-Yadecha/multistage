@@ -85,6 +85,7 @@ int main(void)
     }
 
     // Best rocket found, generate a rocket report.
+    listEater(theList);
     rocketReport(*lightestRocket);
 
     // Printers
@@ -199,5 +200,20 @@ void rocketReport(rocket r)
         }
         printf("Stage dV: %f\n", r.dV[p]);
     }
+}
 
+void listEater(rocket_node *l)
+{
+    rocket_node* ptr = l;
+    if (ptr != NULL)
+    {
+        if (ptr->next != NULL)
+        {
+            listEater(ptr->next);
+        }
+        else
+        {
+            free(ptr);
+        }
+    }
 }

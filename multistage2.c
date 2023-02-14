@@ -87,6 +87,7 @@ int main(void)
     }
 
     // Best rocket found, generate a rocket report.
+    listEater(theList);
     rocketReport(*lightestRocket);
 
     // Cleanup

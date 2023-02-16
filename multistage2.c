@@ -29,47 +29,16 @@ int counter = 0;
 
 int main(int argc, char *argv[])
 {
+    lightestRocket = malloc(sizeof(rocket));
+    lightestRocket->totalMass = 3.402823e+38;
+    rocket base;
     // Process a CSV file as an input, specified in the command-line arguments
     if (argc == 2)
     {
-        char *first_line = malloc(128);
         FILE *input_csv;
         input_csv = fopen(argv[1], "r");
-
-        rocket base;
-        rocket_inputFromCSV(&base, input_csv);
-        /*
-        fread(&first_line, sizeof(float), 1, input_csv);
-        fgets(first_line, 128, input_csv);
-        fgets(first_line, 128, input_csv);
-        printf("%s", first_line);
-        */
+        increments = rocket_inputFromCSV(&base, input_csv);
     }
-    
-    rocket base;
-    lightestRocket = malloc(sizeof(rocket));
-    lightestRocket->totalMass = 3.402823e+38;
-    // Base parameters
-    base.stages = 3;
-    base.totaldV = 10000.0;
-
-    // Payload Parameters
-    base.payload[0] = 0.0;
-    base.payload[1] = 0.0;
-    base.payload[2] = 100.0;
-
-    // Isp
-    base.isp[0] = 300.0;
-    base.isp[1] = 350.0;
-    base.isp[2] = 375.0;
-
-    // Fraction
-    base.fraction[0] = 0.9;
-    base.fraction[1] = 0.9;
-    base.fraction[2] = 0.9;
-
-    // Simulator settings.
-    increments = 100.0;
 
     // Now generate the numbers.
     derFractionator(base, base.totaldV, 0);

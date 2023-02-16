@@ -1,6 +1,8 @@
 // This includes functions to enable multistage2.c to accept CSV input and output to CSV
+#include <stdlib.h>
 #include "./definitions.h"
 #include "./multistage_calculators.c"
+#include "./testing_functions.c"
 
 #define SECTION_LENGTH 128
 #define CSV_BUFFER 128

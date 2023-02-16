@@ -1,3 +1,5 @@
+#ifndef TESTING_FUNCTIONS_C
+#define TESTING_FUNCTIONS_C
 #include "./definitions.h"
 #include <stdio.h>
 
@@ -16,4 +18,4 @@ void node_printer(rocket_node* l) // prints the contents of the specified linked
     printf("| %f ", ptr->nodeRocket.totalMass);
     floatArrayPrinter(ptr->nodeRocket.stages, ptr->nodeRocket.dV);
 }
-
+#endif

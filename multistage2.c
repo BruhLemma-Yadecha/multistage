@@ -2,33 +2,18 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "./helper.c"
+
+#include "./definitions.h"
+#include "./csvIO.c"
+#include "./testing_functions.c"
 
 #define g 9.80665
 #define MAX_LENGTH 1024
-
-// My types
-typedef struct rocket
-{
-    int stages;
-    float totaldV;
-    float totalMass;
-    float dV[10];
-    float payload[10];
-    float isp[10];
-    float fraction[10];
-}rocket;
-
-typedef struct rocket_node
-{
-    rocket nodeRocket;
-    struct rocket_node* next;
-}rocket_node;
+#define CSV_ROW_LENGTH 1024
 
 // My functions
 void derFractionator(rocket r, float dV, int currentStage); // Generates a dV combo to be used to generate a rocket.
-void addRocketToList(rocket r); // Used to add a rocket configuration to the program's main linked list.
-void node_printer(rocket_node* l); // prints the contents of the specified linked list node.
+void addRocketToList(rocket r); // Used to add a rocket configuration to the program's main linked list. 
 void vonBraunClock(rocket *r, int currentStage); // Populates the payload array and the totalMass, returns the finished rocket.
 float calculateStageMass(float dV, float payload, float fraction, float isp); // Self-explanatory.
 void rocketReport(rocket r); // Generates a breakdown of a rocket.
@@ -76,8 +61,10 @@ int main(int argc, char *argv[])
     derFractionator(base, base.totaldV, 0);
 
     // Prepare the csv.
-    FILE *ov;
-    ov = fopen("output-verbose.csv", "w");
+    FILE *output_verbose;
+    FILE *output_regular;
+    output_verbose = fopen("output-verbose.csv", "w");
+    output_regular = fopen("output-regular.csv", "w");
 
     // Write the stage-list & dV list in the format: stage1,stage2,...
     char *stage_list = malloc(MAX_LENGTH);
@@ -86,7 +73,8 @@ int main(int argc, char *argv[])
     wordRepeater(dV_list, "dV", 1, base.stages);
 
     // Now form the header of the CSV file.
-    fprintf(ov, "Total Mass,%s%s\n", stage_list, dV_list);
+    fprintf(output_verbose, "Total Mass,%s%s\n", stage_list, dV_list);
+    fprintf(output_regular, "Total Mass,%s%s\n", stage_list, dV_list);
     free(stage_list);
     free(dV_list);
     
@@ -101,27 +89,31 @@ int main(int argc, char *argv[])
         float mass = pointer->nodeRocket.totalMass;
         if (mass >= 0)
         {
+            // Add a row to the regular CSV
+            char *regular_csv_row = malloc(CSV_ROW_LENGTH);
+            rocket_csvRowGenerator(pointer->nodeRocket, regular_csv_row);
+            fprintf(output_regular, "%s\n", regular_csv_row);
+            free(regular_csv_row);
+
             if (mass < lightestRocket->totalMass)
             {
                 *lightestRocket = pointer->nodeRocket;
             }
         }
 
-        // Initialize CSV columns & print CSV row to file + cleanup.
-        char *stage_columns = malloc(MAX_LENGTH);
-        char *dV_columns = malloc(MAX_LENGTH);
-        csvRowBuilder(stage_columns, pointer->nodeRocket.payload, base.stages);
-        csvRowBuilder(dV_columns, pointer->nodeRocket.dV, base.stages);
-        fprintf(ov, "%f,%s%s\n", mass, stage_columns, dV_columns);
-        free(stage_columns);
-        free(dV_columns);
+        // Add a row to the verbose CSV
+        char *verbose_csv_row = malloc(CSV_ROW_LENGTH);
+        rocket_csvRowGenerator(pointer->nodeRocket, verbose_csv_row);
+        fprintf(output_verbose, "%s\n", verbose_csv_row);
+        free(verbose_csv_row);
 
         // Clean up the node
         rocket_node *np = pointer->next;
         free(pointer); // Shrink the list as you go as we already have the data we need.
         pointer = np;
     }
-    fclose(ov);
+    fclose(output_verbose);
+    fclose(output_regular);
     // Best rocket found, generate a rocket report.
     rocketReport(*lightestRocket);
 
@@ -144,10 +136,6 @@ void derFractionator(rocket r, float dV, int currentStage)
     {
         r.dV[currentStage] = dV;
         counter++;
-        /*
-        printf("%d. ", counter);
-        floatArrayPrinter(r.stages, r.dV);
-        */
         addRocketToList(r);
     }
 }
@@ -206,18 +194,11 @@ float calculateStageMass(float dV, float payload, float fraction, float isp)
     return mass;
 }
 
-void node_printer(rocket_node* l)
-{
-    rocket_node *ptr = l;
-    printf("| %f ", ptr->nodeRocket.totalMass);
-    floatArrayPrinter(ptr->nodeRocket.stages, ptr->nodeRocket.dV);
-}
-
 void rocketReport(rocket r)
 {
     printf("\nHere's your ideal rocket:\nIncrements: %f\n", increments);
     printf("Total Mass: %f t\nPayload: %f t\n", r.totalMass, r.payload[r.stages - 1]);
-    float massSoFar = 0;
+    
     for (int p = r.stages - 1; p > -1; p--)
     {
         printf("----------Stage %d----------\n", p + 1);

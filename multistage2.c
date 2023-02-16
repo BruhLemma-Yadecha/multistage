@@ -61,8 +61,10 @@ int main(int argc, char *argv[])
     derFractionator(base, base.totaldV, 0);
 
     // Prepare the csv.
+    FILE *output_best;
     FILE *output_verbose;
     FILE *output_regular;
+    output_best = fopen("output-best.csv", "w");
     output_verbose = fopen("output-verbose.csv", "w");
     output_regular = fopen("output-regular.csv", "w");
 
@@ -75,6 +77,7 @@ int main(int argc, char *argv[])
     // Now form the header of the CSV file.
     fprintf(output_verbose, "Total Mass,%s%s\n", stage_list, dV_list);
     fprintf(output_regular, "Total Mass,%s%s\n", stage_list, dV_list);
+    fprintf(output_best, "Total Mass,%s%s\n", stage_list, dV_list);
     free(stage_list);
     free(dV_list);
     
@@ -112,10 +115,18 @@ int main(int argc, char *argv[])
         free(pointer); // Shrink the list as you go as we already have the data we need.
         pointer = np;
     }
+
     fclose(output_verbose);
     fclose(output_regular);
+
     // Best rocket found, generate a rocket report.
-    rocketReport(*lightestRocket);
+    //rocketReport(*lightestRocket);
+
+    // Best rocket found, generate a CSV.
+    char *best_csv_row = malloc(CSV_ROW_LENGTH);
+    rocket_csvRowGenerator(*lightestRocket, best_csv_row);
+    fprintf(output_best, "%s\n", best_csv_row);
+    free(best_csv_row);
 
     // Cleanup
     free(lightestRocket);

@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     // Isp
     base.isp[0] = 300.0;
     base.isp[1] = 350.0;
-    base.isp[2] = 400.0;
+    base.isp[2] = 375.0;
 
     // Fraction
     base.fraction[0] = 0.9;
@@ -127,6 +127,7 @@ int main(int argc, char *argv[])
     rocket_csvRowGenerator(*lightestRocket, best_csv_row);
     fprintf(output_best, "%s\n", best_csv_row);
     free(best_csv_row);
+    fclose(output_best);
 
     // Cleanup
     free(lightestRocket);

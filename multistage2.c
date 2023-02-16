@@ -30,8 +30,22 @@ int counter = 0;
 int main(int argc, char *argv[])
 {
     // Process a CSV file as an input, specified in the command-line arguments
+    if (argc == 2)
+    {
+        char *first_line = malloc(128);
+        FILE *input_csv;
+        input_csv = fopen(argv[1], "r");
 
-
+        rocket base;
+        rocket_inputFromCSV(&base, input_csv);
+        /*
+        fread(&first_line, sizeof(float), 1, input_csv);
+        fgets(first_line, 128, input_csv);
+        fgets(first_line, 128, input_csv);
+        printf("%s", first_line);
+        */
+    }
+    
     rocket base;
     lightestRocket = malloc(sizeof(rocket));
     lightestRocket->totalMass = 3.402823e+38;

@@ -29,33 +29,17 @@ int counter = 0;
 
 int main(int argc, char *argv[])
 {
-    // Process a CSV file as an input, specified in the command-line arguments
-
-
     rocket base;
     lightestRocket = malloc(sizeof(rocket));
     lightestRocket->totalMass = 3.402823e+38;
-    // Base parameters
-    base.stages = 3;
-    base.totaldV = 10000.0;
-
-    // Payload Parameters
-    base.payload[0] = 0.0;
-    base.payload[1] = 0.0;
-    base.payload[2] = 100.0;
-
-    // Isp
-    base.isp[0] = 300.0;
-    base.isp[1] = 350.0;
-    base.isp[2] = 375.0;
-
-    // Fraction
-    base.fraction[0] = 0.9;
-    base.fraction[1] = 0.9;
-    base.fraction[2] = 0.9;
-
-    // Simulator settings.
-    increments = 100.0;
+    // Process a CSV file as an input, specified in the command-line arguments
+    if (argc == 2)
+    {
+        FILE *input_csv;
+        input_csv = fopen(argv[1], "r");
+        increments = rocket_inputFromCSV(&base, input_csv);
+        fclose(input_csv);
+    }
 
     // Now generate the numbers.
     derFractionator(base, base.totaldV, 0);
@@ -120,7 +104,7 @@ int main(int argc, char *argv[])
     fclose(output_regular);
 
     // Best rocket found, generate a rocket report.
-    //rocketReport(*lightestRocket);
+    rocketReport(*lightestRocket);
 
     // Best rocket found, generate a CSV.
     char *best_csv_row = malloc(CSV_ROW_LENGTH);

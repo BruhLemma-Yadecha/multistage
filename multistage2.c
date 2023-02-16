@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 #include "./helper.c"
+
+#define g 9.80665
+#define MAX_LENGTH 1024
 
 // My types
 typedef struct rocket
@@ -30,7 +34,7 @@ float calculateStageMass(float dV, float payload, float fraction, float isp); //
 void rocketReport(rocket r); // Generates a breakdown of a rocket.
 
 // Constants y Globals
-float g = 9.80665;
+//float g = 9.80665;
 float increments;
 rocket_node* theList;
 rocket *lightestRocket;
@@ -38,8 +42,11 @@ rocket *lightestRocket;
 // Temporary variables
 int counter = 0;
 
-int main(void)
+int main(int argc, char *argv[])
 {
+    // Process a CSV file as an input, specified in the command-line arguments
+
+
     rocket base;
     lightestRocket = malloc(sizeof(rocket));
     lightestRocket->totalMass = 3.402823e+38;
@@ -68,11 +75,29 @@ int main(void)
     // Now generate the numbers.
     derFractionator(base, base.totaldV, 0);
 
+    // Prepare the csv.
+    FILE *ov;
+    ov = fopen("output-verbose.csv", "w");
+
+    // Write the stage-list & dV list in the format: stage1,stage2,...
+    char *stage_list = malloc(MAX_LENGTH);
+    char *dV_list = malloc(MAX_LENGTH);
+    wordRepeater(stage_list, "stage", 1, base.stages);
+    wordRepeater(dV_list, "dV", 1, base.stages);
+
+    // Now form the header of the CSV file.
+    fprintf(ov, "Total Mass,%s%s\n", stage_list, dV_list);
+    free(stage_list);
+    free(dV_list);
+    
     // Now go through the list running vonBraunClock each time to populate the remaining fields.
+    // This will also populate the output CSV file as this loop is destructive.
     rocket_node *pointer = theList;
+    
     for (int i = 0; i < counter; i++)
     {
         vonBraunClock(&pointer->nodeRocket, base.stages - 1);
+        // Now update the lightest rocket since that's our ultimate output
         float mass = pointer->nodeRocket.totalMass;
         if (mass >= 0)
         {
@@ -81,12 +106,22 @@ int main(void)
                 *lightestRocket = pointer->nodeRocket;
             }
         }
-        //node_printer(pointer);
+
+        // Initialize CSV columns & print CSV row to file + cleanup.
+        char *stage_columns = malloc(MAX_LENGTH);
+        char *dV_columns = malloc(MAX_LENGTH);
+        csvRowBuilder(stage_columns, pointer->nodeRocket.payload, base.stages);
+        csvRowBuilder(dV_columns, pointer->nodeRocket.dV, base.stages);
+        fprintf(ov, "%f,%s%s\n", mass, stage_columns, dV_columns);
+        free(stage_columns);
+        free(dV_columns);
+
+        // Clean up the node
         rocket_node *np = pointer->next;
         free(pointer); // Shrink the list as you go as we already have the data we need.
         pointer = np;
     }
-
+    fclose(ov);
     // Best rocket found, generate a rocket report.
     rocketReport(*lightestRocket);
 

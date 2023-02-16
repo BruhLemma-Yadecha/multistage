@@ -2,12 +2,14 @@
 #include <stdlib.h>
 #include "./definitions.h"
 #include "./multistage_calculators.c"
+#include "./testing_functions.c"
 
 #define SECTION_LENGTH 128
 #define CSV_BUFFER 128
 
 void csv_columngen(char *target, float arr[], int number_of_elements);
-float csvLineTrimmer(char *source, int indexOfFirstDesiredCharacter, int trimmedFromEnd);
+float csvLineTrimmer_singleValue(char *source, int indexOfFirstDesiredCharacter, int trimmedFromEnd);
+void csvLineTrimmer_manyValues(char *source, float arr[], int indexOfFirstDesiredCharacter, int howManyValues);
 
 int rocket_inputFromCSV(rocket *titan, FILE *input_stream)
 {
@@ -16,39 +18,40 @@ int rocket_inputFromCSV(rocket *titan, FILE *input_stream)
     // Extracting increment
     char *line1 = malloc(CSV_BUFFER);
     fgets(line1, CSV_BUFFER, input_stream);
-    char *line1_fixed = malloc(CSV_BUFFER);
-    for(int i = 14; i < strlen(line1) - 4; i++)
-    {
-        if (i != 14)
-        {
-            line1_fixed[i - 14] = line1[i];
-        }
-        else
-        {
-            sprintf(line1_fixed, "%c", line1[i]); // This fixes garbage values showing up as a result of malloc.
-        }
-    }
-    increments = atof(line1_fixed);
+    increments = csvLineTrimmer_singleValue(line1, 14, 4);
     free(line1);
-    free(line1_fixed);
     
+    // Extracting stages
+    char *line2 = malloc(CSV_BUFFER);
+    fgets(line2, CSV_BUFFER, input_stream);
+    titan->stages = (int)csvLineTrimmer_singleValue(line2, 7, 4);
+    free(line2);
+
+    // Extract totaldV
+    char *line3 = malloc(CSV_BUFFER);
+    fgets(line3, CSV_BUFFER, input_stream);
+    titan->totaldV = csvLineTrimmer_singleValue(line3, 8, 4);
+    free(line3);
+
+    // Payload
+    char *line4 = malloc(CSV_BUFFER);
+    fgets(line4, CSV_BUFFER, input_stream);
+    csvLineTrimmer_manyValues(line4, titan->payload, 8, titan->stages);
+    free(line4);
+    floatArrayPrinter(titan->stages, titan->payload);
     /*
-    for(int i = 0; i < strlen(line2); i++)
+    for(int i = 0; i < strlen(line3); i++)
     {
         printf("[%d] %c\n", i, line2[i]);
         
     }
     */
 
-    // Extracting stages
-    char *line2 = malloc(CSV_BUFFER);
-    fgets(line2, CSV_BUFFER, input_stream);
-    titan->stages = (int)csvLineTrimmer(line2, 7, 4);
-    free(line2);
+    
 
 }
 
-float csvLineTrimmer(char *source, int indexOfFirstDesiredCharacter, int trimmedFromEnd)
+float csvLineTrimmer_singleValue(char *source, int indexOfFirstDesiredCharacter, int trimmedFromEnd)
 {
     char *fixed_version = malloc(strlen(source));
     for(int i = indexOfFirstDesiredCharacter; i < strlen(source) - trimmedFromEnd; i++)
@@ -65,6 +68,36 @@ float csvLineTrimmer(char *source, int indexOfFirstDesiredCharacter, int trimmed
     float result = atof(fixed_version);
     free(fixed_version);
     return result;
+}
+
+void csvLineTrimmer_manyValues(char *source, float arr[], int indexOfFirstDesiredCharacter, int howManyValues)
+{
+    char *usable_string = malloc(CSV_BUFFER);
+    for (int i = indexOfFirstDesiredCharacter; i < strlen(source) - 2; i++)
+    {
+        if (i != strlen(source) - 1)
+        {
+            usable_string[i - indexOfFirstDesiredCharacter] = source[i];
+        }
+        else
+        {
+            usable_string[i - indexOfFirstDesiredCharacter] = source[i];
+        }
+    }
+    strcat(usable_string, ",");
+
+    int element_counter = 0;
+    int firstIndex = 0;
+    for (int a = 0; a < strlen(usable_string); a++)
+    {
+        if (usable_string[a] == 44 && element_counter != howManyValues)
+        {
+            arr[element_counter] = csvLineTrimmer_singleValue(usable_string, firstIndex, strlen(usable_string) - a);
+            firstIndex = a + 1;
+            element_counter++;
+        }
+    }
+    free(usable_string);
 }
 
 void rocket_csvRowGenerator(rocket source, char *targetString)

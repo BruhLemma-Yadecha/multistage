@@ -23,6 +23,7 @@ void rocket_csvRowGenerator(rocket source, char *targetString)
     csv_columngen(targetString, source.dV, s); // Append dV values
     targetString[strlen(targetString) - 1] = NULL;
 
+    free(buffer);
 }
 
 void csv_columngen(char *target, float arr[], int number_of_elements)

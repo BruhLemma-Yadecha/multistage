@@ -8,7 +8,7 @@
 #include "./testing_functions.c"
 
 #define g 9.80665
-#define MAX_LENGTH 1024
+#define MAX_LENGTH 16384
 #define CSV_ROW_LENGTH 1024
 
 // My functions
@@ -53,8 +53,8 @@ int main(int argc, char *argv[])
     output_regular = fopen("output-regular.csv", "w");
 
     // Write the stage-list & dV list in the format: stage1,stage2,...
-    char *stage_list = malloc(MAX_LENGTH);
-    char *dV_list = malloc(MAX_LENGTH);
+    char stage_list[MAX_LENGTH];
+    char dV_list[MAX_LENGTH];
     wordRepeater(stage_list, "stage", 1, base.stages);
     wordRepeater(dV_list, "dV", 1, base.stages);
 
@@ -62,8 +62,6 @@ int main(int argc, char *argv[])
     fprintf(output_verbose, "Total Mass,%s%s\n", stage_list, dV_list);
     fprintf(output_regular, "Total Mass,%s%s\n", stage_list, dV_list);
     fprintf(output_best, "Total Mass,%s%s\n", stage_list, dV_list);
-    free(stage_list);
-    free(dV_list);
     
     // Now go through the list running vonBraunClock each time to populate the remaining fields.
     // This will also populate the output CSV file as this loop is destructive.

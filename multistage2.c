@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
         FILE *input_csv;
         input_csv = fopen(argv[1], "r");
         increments = rocket_inputFromCSV(&base, input_csv);
+        fclose(input_csv);
     }
 
     // Now generate the numbers.

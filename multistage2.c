@@ -75,10 +75,9 @@ int main(int argc, char *argv[])
         if (mass >= 0)
         {
             // Add a row to the regular CSV
-            char *regular_csv_row = malloc(CSV_ROW_LENGTH);
+            char regular_csv_row[CSV_ROW_LENGTH];
             rocket_csvRowGenerator(pointer->nodeRocket, regular_csv_row);
             fprintf(output_regular, "%s\n", regular_csv_row);
-            free(regular_csv_row);
 
             if (mass < lightestRocket->totalMass)
             {
@@ -87,10 +86,9 @@ int main(int argc, char *argv[])
         }
 
         // Add a row to the verbose CSV
-        char *verbose_csv_row = malloc(CSV_ROW_LENGTH);
+        char verbose_csv_row[CSV_ROW_LENGTH];
         rocket_csvRowGenerator(pointer->nodeRocket, verbose_csv_row);
         fprintf(output_verbose, "%s\n", verbose_csv_row);
-        free(verbose_csv_row);
 
         // Clean up the node
         rocket_node *np = pointer->next;
@@ -105,10 +103,9 @@ int main(int argc, char *argv[])
     rocketReport(*lightestRocket);
 
     // Best rocket found, generate a CSV.
-    char *best_csv_row = malloc(CSV_ROW_LENGTH);
+    char best_csv_row[CSV_ROW_LENGTH];
     rocket_csvRowGenerator(*lightestRocket, best_csv_row);
     fprintf(output_best, "%s\n", best_csv_row);
-    free(best_csv_row);
     fclose(output_best);
 
     // Cleanup

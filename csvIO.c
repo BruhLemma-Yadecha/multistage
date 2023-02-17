@@ -10,24 +10,28 @@
 void csv_columngen(char *target, float arr[], int number_of_elements);
 float csvLineTrimmer_singleValue(char *source, int indexOfFirstDesiredCharacter, int trimmedFromEnd);
 void csvLineTrimmer_manyValues(char *source, float arr[], int indexOfFirstDesiredCharacter, int howManyValues);
+void remove_spaces(char* s);
 
 float rocket_inputFromCSV(rocket *titan, FILE *input_stream)
 {
     float increments;
-    int cutoff = titan->stages + 1; // This is a bit hacky but if stages or dV give you issues change this.
+    int cutoff = titan->stages - 1; // This is a bit hacky but if stages or dV give you issues change this.
     char *line = malloc(CSV_BUFFER);
     
     // Extracting increment
     fgets(line, CSV_BUFFER, input_stream);
+    remove_spaces(line);
     increments = csvLineTrimmer_singleValue(line, 14, cutoff);
     
     // Extracting stages
     fgets(line, CSV_BUFFER, input_stream);
+    remove_spaces(line);
     titan->stages = (int)csvLineTrimmer_singleValue(line, 7, cutoff);
 
     // Extract totaldV
     fgets(line, CSV_BUFFER, input_stream);
-    titan->totaldV = csvLineTrimmer_singleValue(line, 8, 4);
+    remove_spaces(line);
+    titan->totaldV = csvLineTrimmer_singleValue(line, 8, cutoff);
 
     // Payload
     fgets(line, CSV_BUFFER, input_stream);
@@ -104,7 +108,6 @@ void rocket_csvRowGenerator(rocket source, char *targetString)
     stageMassDistribution(source, stage_mass_pointer, s);
 
     // Initialise each column group
-    char *buffer = malloc(SECTION_LENGTH); // This is for every concatenation.
     float total_mass = source.totalMass;
 
     sprintf(targetString, "%f,", total_mass); // First add the total mass forcefully to avoid garbage values.
@@ -114,8 +117,6 @@ void rocket_csvRowGenerator(rocket source, char *targetString)
     csv_columngen(targetString, source.dV, s); // Append dV values
 
     targetString[strlen(targetString) - 1] = 0;
-
-    free(buffer);
 }
 
 void csv_columngen(char *target, float arr[], int number_of_elements)
@@ -123,7 +124,7 @@ void csv_columngen(char *target, float arr[], int number_of_elements)
     char *buffer = malloc(16); // +1 for the comma.
     for (int i = 0; i < number_of_elements; i++)
     {
-        sprintf(buffer, "%.2f,", arr[i]);
+        sprintf(buffer, "%f,", arr[i]);
         strcat(target, buffer);
     }
     free(buffer);
@@ -146,4 +147,14 @@ void wordRepeater(char *targetString, char *repeatedWord, int first_number, int 
         }
     }
     free(buffer);
+}
+
+void remove_spaces(char* s) // From https://stackoverflow.com/questions/1726302/remove-spaces-from-a-string-in-c
+{
+    char* d = s;
+    do {
+        while (*d == ' ') {
+            ++d;
+        }
+    } while (*s++ = *d++);
 }

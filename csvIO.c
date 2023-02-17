@@ -16,7 +16,7 @@ float rocket_inputFromCSV(rocket *titan, FILE *input_stream)
 {
     float increments;
     int cutoff = titan->stages - 1; // This is a bit hacky but if stages or dV give you issues change this.
-    char *line = malloc(CSV_BUFFER);
+    char line[CSV_BUFFER];
     
     // Extracting increment
     fgets(line, CSV_BUFFER, input_stream);
@@ -45,13 +45,12 @@ float rocket_inputFromCSV(rocket *titan, FILE *input_stream)
     fgets(line, CSV_BUFFER, input_stream);
     csvLineTrimmer_manyValues(line, titan->fraction, 9, titan->stages);
    
-    free(line);
     return increments;
 }
 
 float csvLineTrimmer_singleValue(char *source, int indexOfFirstDesiredCharacter, int trimmedFromEnd)
 {
-    char *fixed_version = malloc(strlen(source));
+    char fixed_version[strlen(source)];
     for(int i = indexOfFirstDesiredCharacter; i < strlen(source) - trimmedFromEnd; i++)
     {
         if (i != indexOfFirstDesiredCharacter)
@@ -64,13 +63,12 @@ float csvLineTrimmer_singleValue(char *source, int indexOfFirstDesiredCharacter,
         }
     }
     float result = atof(fixed_version);
-    free(fixed_version);
     return result;
 }
 
 void csvLineTrimmer_manyValues(char *source, float arr[], int indexOfFirstDesiredCharacter, int howManyValues)
 {
-    char *usable_string = malloc(CSV_BUFFER);
+    char usable_string[CSV_BUFFER];
     for (int i = indexOfFirstDesiredCharacter; i < strlen(source) - 2; i++)
     {
         if (i != strlen(source) - 1)
@@ -95,7 +93,6 @@ void csvLineTrimmer_manyValues(char *source, float arr[], int indexOfFirstDesire
             element_counter++;
         }
     }
-    free(usable_string);
 }
 
 void rocket_csvRowGenerator(rocket source, char *targetString)
@@ -121,18 +118,17 @@ void rocket_csvRowGenerator(rocket source, char *targetString)
 
 void csv_columngen(char *target, float arr[], int number_of_elements)
 {
-    char *buffer = malloc(16); // +1 for the comma.
+    char buffer[CSV_BUFFER];
     for (int i = 0; i < number_of_elements; i++)
     {
         sprintf(buffer, "%f,", arr[i]);
         strcat(target, buffer);
     }
-    free(buffer);
 }
 
 void wordRepeater(char *targetString, char *repeatedWord, int first_number, int last_number)
 {
-    char *buffer = malloc(strlen(repeatedWord) + 4); // +4 for safety
+    char buffer[strlen(repeatedWord) + 4]; // +4 is arbitrary, just works. The higher the better as this is a buffer.
     for (int i = first_number; i < last_number + 1; i++)
     {
         if (i != first_number)
@@ -146,7 +142,6 @@ void wordRepeater(char *targetString, char *repeatedWord, int first_number, int 
             strcat(targetString, ",");
         }
     }
-    free(buffer);
 }
 
 void remove_spaces(char* s) // From https://stackoverflow.com/questions/1726302/remove-spaces-from-a-string-in-c

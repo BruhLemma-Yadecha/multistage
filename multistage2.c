@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
     char dV_list[MAX_LENGTH];
     wordRepeater(stage_list, "stage", 1, base.stages);
     wordRepeater(dV_list, "dV", 1, base.stages);
+    dV_list[strlen(dV_list) - 1] = 0;
 
     // Now form the header of the CSV file.
     fprintf(output_verbose, "Total Mass,%s%s\n", stage_list, dV_list);
@@ -117,7 +118,7 @@ void derFractionator(rocket r, float dV, int currentStage)
     if (currentStage != r.stages - 1)
     {
         int runs = dV / increments;
-        for (int i = 0; i < runs + 1; i++)
+        for (int i = 0; i < runs; i++)
         {
             r.dV[currentStage] = dV - i*increments;
             derFractionator(r, dV - r.dV[currentStage], currentStage + 1);
@@ -125,9 +126,12 @@ void derFractionator(rocket r, float dV, int currentStage)
     }
     else
     {
-        r.dV[currentStage] = dV;
-        counter++;
-        addRocketToList(r);
+        if (dV > 0)
+        {
+            r.dV[currentStage] = dV;
+            counter++;
+            addRocketToList(r);
+        }
     }
 }
 

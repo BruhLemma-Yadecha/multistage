@@ -24,3 +24,13 @@ float floatArraySum(int elements, float arr[])
     }
     return sum;
 }
+
+float zero_spotter(float arr[], int elements)
+{
+    float product = 1;
+    for (int i = 0; i < elements; i++)
+    {
+        product = product * arr[i];
+    }
+    return product;
+}

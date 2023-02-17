@@ -1,0 +1,40 @@
+.index-body
+{
+    background-color: azure;
+    font-family: 'Poppins', sans-serif;
+}
+.title
+{
+    font-family: 'Poppins', sans-serif;
+    margin: 1em;
+}
+.icon
+{
+    margin-left: 2em;
+    margin-right: .5em;
+    width: 30px;
+    height: 30px;
+}
+.projectList
+{
+    margin-left: 25%;
+    margin-right: 25%;
+}
+a:link
+{
+    text-decoration: none;
+}
+.list-item-icon
+{
+    width: 25px;
+    height: 25px;
+}
+.calculator-input
+{
+    margin-left: -25%;
+    margin-right: -25%;
+}
+.calculator-result
+{
+    font-size: larger;
+}

@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     fclose(output_regular);
 
     // Best rocket found, generate a rocket report.
-    //rocketReport(*lightestRocket);
+    rocketReport(*lightestRocket);
 
     // Best rocket found, generate a CSV.
     char *best_csv_row = malloc(CSV_ROW_LENGTH);

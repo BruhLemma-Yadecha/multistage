@@ -106,11 +106,15 @@ void rocket_csvRowGenerator(rocket source, char *targetString)
 
     // Initialise each column group
     char *buffer = malloc(SECTION_LENGTH); // This is for every concatenation.
+    float total_mass = source.totalMass;
 
-    sprintf(targetString, "%f", source.totalMass); // First add the total mass forcefully to avoid garbage values.
+    sprintf(targetString, "%f,", total_mass); // First add the total mass forcefully to avoid garbage values.
+
     csv_columngen(targetString, stage_mass, s); // Append stage masses
+
     csv_columngen(targetString, source.dV, s); // Append dV values
-    targetString[strlen(targetString) - 1] = NULL;
+
+    targetString[strlen(targetString) - 1] = 0;
 
     free(buffer);
 }
@@ -120,7 +124,7 @@ void csv_columngen(char *target, float arr[], int number_of_elements)
     char *buffer = malloc(16); // +1 for the comma.
     for (int i = 0; i < number_of_elements; i++)
     {
-        sprintf(buffer, "%f,", arr[i]);
+        sprintf(buffer, "%.2f,", arr[i]);
         strcat(target, buffer);
     }
     free(buffer);
